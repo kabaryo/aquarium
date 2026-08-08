@@ -14,7 +14,7 @@
   :root{
     --ink:#0E2233; --ink2:#4A6072; --paper:#EDF0EC; --card:#fff;
     --line:#D5DCD6; --water:#2F6E8F; --fill:#D6E5EC; --over:#F0DED8;
-    --moss:#6E8A4F; --clay:#9A6A3C; --alert:#A8412C;
+    --moss:#6E8A4F; --clay:#9A6A3C; --plum:#7A5A86; --alert:#A8412C;
     --sans:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   }
@@ -36,13 +36,6 @@
   .fill{position:absolute;left:0;right:0;bottom:0;background:var(--fill);transition:height .9s cubic-bezier(.22,.61,.36,1)}
   .card .inner{position:relative;padding:14px;display:flex;flex-direction:column}
   .crow{display:flex;gap:14px;align-items:stretch}
-  .fmeta{display:flex;flex-direction:column;gap:4px;margin-top:11px;padding-top:10px;
-         border-top:1px dashed var(--line)}
-  .frow{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
-  .fnm{font-size:11.5px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .fdt{font-family:var(--mono);font-size:10.5px;color:var(--ink2);
-       font-variant-numeric:tabular-nums;flex:none}
-  .fdt.none{opacity:.55}
   .thumb{width:74px;height:74px;flex:none;border:1px solid var(--line);background:#fff;
          overflow:hidden;display:flex;align-items:center;justify-content:center}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -55,6 +48,13 @@
   .days.over{color:var(--alert)}
   .dlabel{font-size:11.5px;color:var(--ink2);padding-bottom:3px}
   .meta{margin-top:8px;font-family:var(--mono);font-size:10.5px;color:var(--ink2)}
+  .fmeta{display:flex;flex-direction:column;gap:4px;margin-top:11px;padding-top:10px;
+         border-top:1px dashed var(--line)}
+  .frow{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .fnm{font-size:11.5px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fdt{font-family:var(--mono);font-size:10.5px;color:var(--ink2);
+       font-variant-numeric:tabular-nums;flex:none}
+  .fdt.none{opacity:.55}
 
   .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--ink2);
        text-transform:uppercase;margin-bottom:6px}
@@ -70,6 +70,7 @@
   .chip.on{border-color:var(--water);background:var(--fill);color:var(--ink)}
   .chip.on.f{border-color:var(--moss);background:#E4EBDA}
   .chip.on.l{border-color:var(--clay);background:#EFE4D8}
+  .chip.on.b{border-color:var(--plum);background:#E8E1EC}
   .btn{width:100%;padding:13px;border:1px solid var(--line);background:#fff;color:var(--ink2);
        font-size:15px;border-radius:2px;cursor:pointer}
   .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
@@ -85,7 +86,8 @@
   .rec .date{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
   .acts{display:flex;gap:4px}
   .tags{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:13px}
-  .tags .w{color:var(--water)} .tags .f{color:var(--moss)} .tags .l{color:var(--clay)}
+  .tags .w{color:var(--water)} .tags .f{color:var(--moss)}
+  .tags .l{color:var(--clay)} .tags .b{color:var(--plum)}
   .rec p{margin:8px 0 0;font-size:13px;color:var(--ink2);white-space:pre-wrap}
   .rec img{width:100%;margin-top:10px;display:block}
   .act{background:none;border:1px solid var(--line);color:var(--ink2);font-size:12px;
@@ -94,6 +96,8 @@
   .link{background:none;border:0;color:var(--ink2);font-size:12.5px;text-decoration:underline;cursor:pointer;padding:4px 0}
   .fline{display:flex;gap:8px;align-items:center;margin-bottom:8px}
   .fline input{flex:1}
+  .fline .num{flex:none;width:96px}
+  .fline .nm{font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .fdel{background:none;border:1px solid var(--line);color:var(--ink2);padding:8px 10px;font-size:13px;cursor:pointer;border-radius:2px}
   .tphoto{width:100%;display:block;border:1px solid var(--line);margin-bottom:10px}
   @media (prefers-reduced-motion: reduce){.fill{transition:none}}
@@ -124,12 +128,14 @@ window.addEventListener("unhandledrejection", function(e){
 
 /* ================= storage ================= */
 const LS = "aqNote.v1";
+const newTank = (name, volume) => ({id:uid(), name, volume:volume||"", interval:7,
+  filters:[], stock:[], hasPhoto:false});
 const SEED = {
   tanks:[
-    {id:"t1",name:"室内 小型水槽",volume:"",interval:7,filters:[],hasPhoto:false},
-    {id:"t2",name:"屋外 60Lバケツ",volume:"60",interval:7,filters:[],hasPhoto:false},
-    {id:"t3",name:"水槽3",volume:"",interval:7,filters:[],hasPhoto:false},
-    {id:"t4",name:"水槽4",volume:"",interval:7,filters:[],hasPhoto:false}
+    {id:"t1",name:"室内 小型水槽",volume:"",interval:7,filters:[],stock:[],hasPhoto:false},
+    {id:"t2",name:"屋外 60Lバケツ",volume:"60",interval:7,filters:[],stock:[],hasPhoto:false},
+    {id:"t3",name:"水槽3",volume:"",interval:7,filters:[],stock:[],hasPhoto:false},
+    {id:"t4",name:"水槽4",volume:"",interval:7,filters:[],stock:[],hasPhoto:false}
   ],
   records:[]
 };
@@ -138,10 +144,13 @@ let data = SEED, note = "";
 function migrate(){
   data.tanks.forEach(t=>{
     if(!Array.isArray(t.filters)) t.filters = [];
+    if(!Array.isArray(t.stock)) t.stock = [];
     if(typeof t.hasPhoto !== "boolean") t.hasPhoto = false;
+    t.stock.forEach(x=>{ x.count = Number(x.count)||0; });
   });
   data.records.forEach(r=>{
     if(!Array.isArray(r.filterIds)) r.filterIds = [];
+    if(!Array.isArray(r.bio)) r.bio = [];
     if(typeof r.cleaned !== "boolean") r.cleaned = false;
     if(typeof r.layout !== "boolean") r.layout = false;
   });
@@ -190,7 +199,7 @@ const tankKey = id => "tank:" + id;
 const pad = n => String(n).padStart(2,"0");
 const today = () => { const d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); };
 const daysSince = iso => iso ? Math.round((new Date(today()+"T00:00:00") - new Date(iso+"T00:00:00"))/86400000) : null;
-const uid = () => Math.random().toString(36).slice(2,10);
+function uid(){ return Math.random().toString(36).slice(2,10); }
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function shrink(file,max,q){
@@ -224,12 +233,38 @@ function pickImage(max,q){
 
 const recsOf = tid => data.records.filter(r=>r.tankId===tid).sort((a,b)=> a.date<b.date?1:-1);
 const lastChange = tid => recsOf(tid).find(r=>r.changed) || null;
-const lastClean = (tid, fid) =>
-  recsOf(tid).find(r => r.cleaned && (r.filterIds||[]).includes(fid)) || null;
-const workLabel = r => [r.changed?"水換え":null, r.cleaned?"フィルター掃除":null, r.layout?"レイアウト変更":null]
+const lastClean = (tid,fid) => recsOf(tid).find(r=> r.cleaned && (r.filterIds||[]).includes(fid)) || null;
+const workLabel = r => [r.changed?"水換え":null, r.cleaned?"フィルター掃除":null,
+    r.layout?"レイアウト変更":null, (r.bio&&r.bio.length)?"生体の増減":null]
   .filter(Boolean).join("・") || "メモ";
+const bioText = r => (r.bio||[]).map(b=> b.name + " " + (b.delta>0?"+":"") + b.delta).join("・");
+const totalFish = t => t.stock.reduce((n,x)=> n + (Number(x.count)||0), 0);
 
-/* ================= CSV 取り込み ================= */
+/* 生体の増減を在庫に反映（sign=1で適用、-1で巻き戻し） */
+function applyBio(t, bio, sign){
+  (bio||[]).forEach(b=>{
+    let sp = t.stock.find(x=>x.id===b.id) || t.stock.find(x=>x.name===b.name);
+    if(!sp){ sp = {id:b.id||uid(), name:b.name, count:0}; t.stock.push(sp); }
+    sp.count = Math.max(0, (Number(sp.count)||0) + sign*(Number(b.delta)||0));
+  });
+}
+
+/* ================= CSV ================= */
+const COLS = ["日付","水槽","水換え","換水率%","フィルター掃除","掃除したフィルター",
+              "レイアウト変更","生体の増減","メモ"];
+
+function buildCSV(){
+  const q = v => '"' + String(v??"").replace(/"/g,'""') + '"';
+  const tk = id => data.tanks.find(t=>t.id===id);
+  const nm = id => tk(id)?.name ?? id;
+  const fnames = r => (r.filterIds||[]).map(fid=> tk(r.tankId)?.filters.find(f=>f.id===fid)?.name)
+                        .filter(Boolean).join("・");
+  const rows = [...data.records].sort((a,b)=>a.date<b.date?-1:1).map(r=>
+    [r.date, nm(r.tankId), r.changed?1:0, r.pct, r.cleaned?1:0, fnames(r),
+     r.layout?1:0, bioText(r), r.memo].map(q).join(","));
+  return [COLS.map(q).join(","), ...rows].join("\n");
+}
+
 function parseCSV(text){
   const rows = []; let row = [], f = "", q = false;
   text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").replace(/^\uFEFF/,"");
@@ -249,47 +284,67 @@ function parseCSV(text){
   return rows.filter(r => r.some(x => String(x).trim() !== ""));
 }
 
-const recKey = r => [r.date, r.tankId, r.changed?1:0, r.cleaned?1:0, r.layout?1:0, (r.memo||"").trim()].join("|");
+const recKey = r => [r.date, r.tankId, r.changed?1:0, r.cleaned?1:0, r.layout?1:0,
+                     bioText(r), (r.memo||"").trim()].join("|");
 
 function importCSV(text, mode){
   const rows = parseCSV(text);
   if(!rows.length) return {ok:false, msg:"データを読み取れませんでした。CSVの中身を確認してください。"};
-  const start = String(rows[0][0]).trim() === "日付" ? 1 : 0;
+
+  /* ヘッダがあれば列名で対応づけ、なければ既定の並び順とみなす */
+  let start = 0, idx = {};
+  if(String(rows[0][0]).trim() === "日付"){
+    start = 1;
+    rows[0].forEach((h,i)=>{ idx[String(h).trim()] = i; });
+  }else{
+    COLS.forEach((h,i)=>{ idx[h] = i; });
+  }
+  const cell = (c,name) => idx[name]===undefined ? "" : String(c[idx[name]] ?? "");
   const truthy = v => ["1","true","TRUE","はい","○","YES","yes"].includes(String(v??"").trim());
 
-  const parsed = [];
-  let skipped = 0;
+  const parsed = []; let skipped = 0;
   for(let i=start;i<rows.length;i++){
     const c = rows[i];
-    const date = String(c[0]??"").trim();
+    const date = cell(c,"日付").trim();
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ skipped++; continue; }
-    const tname = String(c[1]??"").trim();
-    let t = data.tanks.find(x => x.name === tname);
-    if(!t){
-      t = {id:uid(), name:tname || "名称未設定", volume:"", interval:7, filters:[], hasPhoto:false};
-      data.tanks.push(t);
-    }
-    const fids = String(c[5]??"").split("・").map(x=>x.trim()).filter(Boolean).map(n=>{
-      let f = t.filters.find(x => x.name === n);
+
+    const tname = cell(c,"水槽").trim();
+    let t = data.tanks.find(x=>x.name === tname);
+    if(!t){ t = newTank(tname || "名称未設定"); data.tanks.push(t); }
+
+    const fids = cell(c,"掃除したフィルター").split("・").map(x=>x.trim()).filter(Boolean).map(n=>{
+      let f = t.filters.find(x=>x.name === n);
       if(!f){ f = {id:uid(), name:n}; t.filters.push(f); }
       return f.id;
     });
+
+    const bio = cell(c,"生体の増減").split("・").map(x=>x.trim()).filter(Boolean).map(x=>{
+      const m = x.match(/^(.*?)\s*([+-]?\d+)$/);
+      if(!m) return null;
+      const name = m[1].trim(), delta = Number(m[2]);
+      if(!name || !delta) return null;
+      let sp = t.stock.find(y=>y.name === name);
+      if(!sp){ sp = {id:uid(), name, count:0}; t.stock.push(sp); }
+      return {id:sp.id, name, delta};
+    }).filter(Boolean);
+
     parsed.push({
       id: uid(), tankId: t.id, date,
-      changed: truthy(c[2]), pct: String(c[3]??"").trim(),
-      cleaned: truthy(c[4]), filterIds: fids,
-      layout: truthy(c[6]), memo: String(c[7]??""), hasPhoto: false
+      changed: truthy(cell(c,"水換え")), pct: cell(c,"換水率%").trim(),
+      cleaned: truthy(cell(c,"フィルター掃除")), filterIds: fids,
+      layout: truthy(cell(c,"レイアウト変更")), bio,
+      memo: cell(c,"メモ"), hasPhoto: false
     });
   }
   if(!parsed.length) return {ok:false, msg:"取り込める行がありませんでした（日付の形式は 2026-08-08 です）。"};
 
   let added = 0, dup = 0;
   if(mode === "replace"){
-    data.records.forEach(r => { if(r.hasPhoto) delPhoto(r.id); });
+    data.records.forEach(r=>{ if(r.hasPhoto) delPhoto(r.id); });
     data.records = parsed; added = parsed.length;
   }else{
     const have = new Set(data.records.map(recKey));
-    parsed.forEach(r => {
+    parsed.forEach(r=>{
       if(have.has(recKey(r))){ dup++; return; }
       have.add(recKey(r)); data.records.push(r); added++;
     });
@@ -298,7 +353,7 @@ function importCSV(text, mode){
   return {ok:true, msg:"取り込みました：" + added + " 件"
     + (dup ? " ／ 重複のため見送り " + dup + " 件" : "")
     + (skipped ? " ／ 日付が読めず除外 " + skipped + " 件" : "")
-    + "。写真はCSVに含まれないため復元されません。"};
+    + "。写真と、現在の生体数は復元されません（生体数は「水槽の設定」で入れ直してください）。"};
 }
 
 /* ================= views ================= */
@@ -314,16 +369,18 @@ function renderList(){
     const pct = d===null ? 0 : Math.min(1, d/(t.interval||7));
     const over = d!==null && d > (t.interval||7);
     const latest = recsOf(t.id)[0];
+    const fish = totalFish(t);
+
     const fmeta = t.filters.length
       ? '<span class="fmeta">' + t.filters.map(f=>{
           const c = lastClean(t.id, f.id);
-          const fd = c ? daysSince(c.date) : null;
           return '<span class="frow"><span class="fnm">'+esc(f.name)+'</span>'
             + '<span class="fdt'+(c?"":" none")+'">'
-            + (c ? c.date.slice(5).replace("-",".")+"  "+fd+"日前" : "掃除記録なし")
+            + (c ? c.date.slice(5).replace("-",".")+"  "+daysSince(c.date)+"日前" : "掃除記録なし")
             + '</span></span>';
         }).join("") + '</span>'
       : "";
+
     return '<button class="card" data-tank="'+t.id+'">'
       + '<span class="fill" style="height:'+(pct*100)+'%;background:'+(over?"var(--over)":"var(--fill)")+'"></span>'
       + '<span class="inner">'
@@ -336,7 +393,11 @@ function renderList(){
       +       '<span style="display:flex;align-items:flex-end;gap:7px;margin-top:8px">'
       +         '<span class="days '+(over?"over":"")+'">'+(d===null?"—":d)+'</span>'
       +         '<span class="dlabel">'+(d===null?"換水記録なし":"日前に換水 ／ 目安 "+t.interval+"日")+'</span></span>'
-      +       '<span class="meta">'+(latest?"最終記録 "+latest.date.slice(5).replace("-",".")+" "+workLabel(latest):"")+'</span>'
+      +       '<span class="meta">'
+      +         (fish ? "生体 "+fish+"匹" : "")
+      +         (fish && latest ? " ／ " : "")
+      +         (latest ? "最終記録 "+latest.date.slice(5).replace("-",".")+" "+workLabel(latest) : "")
+      +       '</span>'
       +     '</span>'
       +   '</span>' + fmeta
       + '</span></button>';
@@ -363,10 +424,17 @@ function renderTank(){
   const t = data.tanks.find(x=>x.id===view.id);
   const rows = recsOf(t.id);
   const fname = id => t.filters.find(f=>f.id===id)?.name || "";
+  const shown = t.stock.filter(x=>Number(x.count) > 0);
 
   app.innerHTML =
     '<div class="head"><button class="back" id="bk">‹</button><h2>'+esc(t.name)+'</h2></div>'
     + noteHTML() + '<div style="padding-top:16px">'
+    + '<div class="rec"><div class="lbl">現在の生体</div>'
+    +   (shown.length
+        ? shown.map(x=>'<div class="frow" style="margin-top:4px"><span class="fnm" style="font-size:13px;color:var(--ink)">'
+            + esc(x.name)+'</span><span class="fdt">'+Number(x.count)+' 匹</span></div>').join("")
+        : '<p class="sub" style="margin:0">登録がありません。「水槽の設定」から追加できます。</p>')
+    + '</div>'
     + (rows.length===0 ? '<p class="sub">まだ記録がありません。下のボタンから最初の1件を残しましょう。</p>' : "")
     + rows.map(r=>{
         const fl = (r.filterIds||[]).map(fname).filter(Boolean).join("・");
@@ -377,6 +445,7 @@ function renderTank(){
         +   (r.changed?'<span class="w">水換え'+(r.pct?" "+esc(r.pct)+"%":"")+'</span>':"")
         +   (r.cleaned?'<span class="f">フィルター掃除'+(fl?" ／ "+esc(fl):"")+'</span>':"")
         +   (r.layout?'<span class="l">レイアウト変更</span>':"")
+        +   ((r.bio&&r.bio.length)?'<span class="b">生体 '+esc(bioText(r))+'</span>':"")
         + '</div>'
         + (r.memo?'<p>'+esc(r.memo)+'</p>':"")
         + (r.hasPhoto?'<div data-photo="'+r.id+'"></div>':"")
@@ -390,7 +459,9 @@ function renderTank(){
   app.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=>{
     if(!confirm("この記録を削除します。よろしいですか？")) return;
     const id = b.dataset.del;
-    if(data.records.find(r=>r.id===id)?.hasPhoto) delPhoto(id);
+    const rec = data.records.find(r=>r.id===id);
+    if(rec && rec.bio && rec.bio.length) applyBio(t, rec.bio, -1);
+    if(rec && rec.hasPhoto) delPhoto(id);
     data.records = data.records.filter(r=>r.id!==id);
     save(); render();
   });
@@ -404,10 +475,12 @@ function renderForm(){
   const t = data.tanks.find(x=>x.id===view.id);
   const rec = view.recId ? data.records.find(r=>r.id===view.recId) : null;
   const picked = new Set(rec?.filterIds || []);
-  let photo = null;                                  // 新しく選んだ写真
-  let photoMode = rec?.hasPhoto ? "keep" : "none";   // keep / removed / new
-
+  const prevBio = {}; (rec?.bio || []).forEach(b=>{ prevBio[b.id] = b.delta; });
+  const extras = [];                                 // 新しく足す生体
+  let photo = null;
+  let photoMode = rec?.hasPhoto ? "keep" : "none";
   const on = v => v ? " on" : "";
+
   app.innerHTML =
     '<div class="head"><button class="back" id="bk">‹</button><h2>'
       + (rec ? "記録を編集" : esc(t.name)+" に記録") + '</h2></div>'
@@ -416,7 +489,8 @@ function renderForm(){
     + '<div class="fld"><div class="lbl">作業</div><div class="chips">'
     +   '<button class="chip'+(rec?on(rec.changed):" on")+'" id="chg">水換え</button>'
     +   '<button class="chip f'+(rec?on(rec.cleaned):"")+'" id="cln">フィルター掃除</button>'
-    +   '<button class="chip l'+(rec?on(rec.layout):"")+'" id="lay">レイアウト変更</button></div></div>'
+    +   '<button class="chip l'+(rec?on(rec.layout):"")+'" id="lay">レイアウト変更</button>'
+    +   '<button class="chip b'+on(!!(rec&&rec.bio&&rec.bio.length))+'" id="bio">生体の増減</button></div></div>'
     + '<div class="fld" id="pctWrap"><div class="lbl">換水率（％・任意）</div>'
     +   '<input type="number" id="pct" inputmode="decimal" placeholder="30" value="'+esc(rec?.pct||"")+'"></div>'
     + '<div class="fld" id="fWrap"><div class="lbl">掃除したフィルター</div>'
@@ -425,6 +499,12 @@ function renderForm(){
             '<button class="chip f'+on(picked.has(f.id))+'" data-f="'+f.id+'">'+esc(f.name)+'</button>').join("")+'</div>'
         : '<p class="sub" style="margin:0">この水槽にはフィルターが登録されていません。「水槽の設定」から追加できます。</p>')
     + '</div>'
+    + '<div class="fld" id="bWrap"><div class="lbl">生体の増減</div>'
+    +   '<div id="bioRows"></div>'
+    +   '<div class="fline"><input type="text" id="nName" placeholder="新しい生体の名前">'
+    +     '<input type="number" class="num" id="nDelta" inputmode="numeric" placeholder="数">'
+    +     '<button class="fdel" id="nAdd">追加</button></div>'
+    +   '<p class="sub" style="margin-top:8px">増えたら 2、減ったら -1 のように入力します。空欄は変更なしです。</p></div>'
     + '<div class="fld"><div class="lbl">メモ</div>'
     +   '<textarea id="memo" rows="3" placeholder="餌食い、コケ、生体の様子など">'+esc(rec?.memo||"")+'</textarea></div>'
     + '<div class="fld"><div class="lbl">写真</div>'
@@ -434,21 +514,50 @@ function renderForm(){
     +   '<button class="btn" id="cancel">やめる</button>'
     +   '<button class="btn primary" id="ok">'+(rec?"保存する":"記録する")+'</button></div></div>';
 
-  const chg = app.querySelector("#chg"), cln = app.querySelector("#cln"), lay = app.querySelector("#lay");
+  const chg = app.querySelector("#chg"), cln = app.querySelector("#cln");
+  const lay = app.querySelector("#lay"), bio = app.querySelector("#bio");
   const pctWrap = app.querySelector("#pctWrap"), fWrap = app.querySelector("#fWrap");
+  const bWrap = app.querySelector("#bWrap"), bioRows = app.querySelector("#bioRows");
+
+  function drawBioRows(){
+    bioRows.innerHTML =
+      (t.stock.length
+        ? t.stock.map(x=>
+            '<div class="fline"><span class="nm">'+esc(x.name)+'（現在 '+(Number(x.count)||0)+'匹）</span>'
+            + '<input type="number" class="num" inputmode="numeric" data-b="'+x.id+'" placeholder="±0"'
+            + ' value="'+(prevBio[x.id]!==undefined?prevBio[x.id]:"")+'"></div>').join("")
+        : '<p class="sub" style="margin:0 0 8px">登録済みの生体はありません。下の欄から追加できます。</p>')
+      + extras.map((e,i)=>
+          '<div class="fline"><span class="nm">'+esc(e.name)+'（新規）</span>'
+          + '<input type="number" class="num" inputmode="numeric" data-x="'+i+'" value="'+e.delta+'"></div>').join("");
+  }
+  drawBioRows();
+
   const sync = ()=>{
     pctWrap.style.display = chg.classList.contains("on") ? "" : "none";
     fWrap.style.display   = cln.classList.contains("on") ? "" : "none";
+    bWrap.style.display   = bio.classList.contains("on") ? "" : "none";
   };
   chg.onclick = ()=>{ chg.classList.toggle("on"); sync(); };
   cln.onclick = ()=>{ cln.classList.toggle("on"); sync(); };
   lay.onclick = ()=> lay.classList.toggle("on");
+  bio.onclick = ()=>{ bio.classList.toggle("on"); sync(); };
   sync();
 
   app.querySelectorAll("[data-f]").forEach(b=> b.onclick = ()=>{
     b.classList.toggle("on");
     b.classList.contains("on") ? picked.add(b.dataset.f) : picked.delete(b.dataset.f);
   });
+
+  app.querySelector("#nAdd").onclick = ()=>{
+    const nm = app.querySelector("#nName").value.trim();
+    const dv = Number(app.querySelector("#nDelta").value);
+    if(!nm || !dv) return;
+    extras.push({name:nm, delta:dv});
+    app.querySelector("#nName").value = "";
+    app.querySelector("#nDelta").value = "";
+    drawBioRows();
+  };
 
   const prev = app.querySelector("#prev");
   const showPhoto = url =>{
@@ -467,23 +576,44 @@ function renderForm(){
   app.querySelector("#bk").onclick = app.querySelector("#cancel").onclick = back;
 
   app.querySelector("#ok").onclick = async ()=>{
+    const bioOn = bio.classList.contains("on");
+    const list = [];
+    if(bioOn){
+      app.querySelectorAll("[data-b]").forEach(inp=>{
+        const v = Number(inp.value);
+        if(!v) return;
+        const sp = t.stock.find(x=>x.id===inp.dataset.b);
+        if(sp) list.push({id:sp.id, name:sp.name, delta:v});
+      });
+      app.querySelectorAll("[data-x]").forEach(inp=>{
+        const e = extras[+inp.dataset.x];
+        const v = Number(inp.value);
+        if(!e || !v) return;
+        list.push({id:uid(), name:e.name, delta:v});
+      });
+    }
     const fields = {
       date: app.querySelector("#date").value || today(),
       changed: chg.classList.contains("on"),
       cleaned: cln.classList.contains("on"),
       layout:  lay.classList.contains("on"),
       filterIds: cln.classList.contains("on") ? [...picked] : [],
+      bio: list,
       pct: chg.classList.contains("on") ? app.querySelector("#pct").value : "",
       memo: app.querySelector("#memo").value
     };
+
     if(rec){
+      applyBio(t, rec.bio, -1);            // 前の増減を打ち消してから
       Object.assign(rec, fields);
+      applyBio(t, fields.bio, 1);
       if(photoMode === "new"){ await putPhoto(rec.id, photo); rec.hasPhoto = true; }
       else if(photoMode === "removed"){ delPhoto(rec.id); rec.hasPhoto = false; }
     }else{
       const id = uid();
       if(photoMode === "new") await putPhoto(id, photo);
       data.records.push(Object.assign({id, tankId:t.id, hasPhoto: photoMode==="new"}, fields));
+      applyBio(t, fields.bio, 1);
     }
     save(); back();
   };
@@ -512,19 +642,25 @@ function renderTanks(){
             '<div class="fline"><input type="text" value="'+esc(f.name)+'" data-fn="'+f.id+'" data-i="'+i+'" placeholder="外部フィルター など">'
             + '<button class="fdel" data-fd="'+f.id+'" data-i="'+i+'">削除</button></div>').join("")
         + '<button class="link" data-fa="'+i+'">＋ フィルターを追加</button>'
+        + '<div class="lbl" style="margin-top:18px">生体</div>'
+        + t.stock.map(x=>
+            '<div class="fline"><input type="text" value="'+esc(x.name)+'" data-sn="'+x.id+'" data-i="'+i+'" placeholder="アカヒレ など">'
+            + '<input type="number" class="num" value="'+(Number(x.count)||0)+'" data-sc="'+x.id+'" data-i="'+i+'">'
+            + '<button class="fdel" data-sd="'+x.id+'" data-i="'+i+'">削除</button></div>').join("")
+        + '<button class="link" data-sa="'+i+'">＋ 生体を追加</button>'
         + '</div>').join("")
     + '<button class="drop" id="addTank">＋ 水槽を追加</button>'
     + '<div style="margin-top:20px"><button class="link" id="wipe">すべての記録を消す</button></div></div>';
 
   app.querySelector("#bk").onclick = ()=> go({name:"list"});
+
   app.querySelectorAll("[data-f]").forEach(inp=> inp.onchange = ()=>{
     const t = data.tanks[+inp.dataset.i], f = inp.dataset.f;
     t[f] = f==="interval" ? (Number(inp.value)||7) : inp.value;
     save();
   });
   app.querySelectorAll("[data-fn]").forEach(inp=> inp.onchange = ()=>{
-    const t = data.tanks[+inp.dataset.i];
-    const f = t.filters.find(x=>x.id===inp.dataset.fn);
+    const f = data.tanks[+inp.dataset.i].filters.find(x=>x.id===inp.dataset.fn);
     if(f){ f.name = inp.value; save(); }
   });
   app.querySelectorAll("[data-fd]").forEach(b=> b.onclick = ()=>{
@@ -537,6 +673,27 @@ function renderTanks(){
     t.filters.push({id:uid(), name:"フィルター"+(t.filters.length+1)});
     save(); render();
   });
+
+  app.querySelectorAll("[data-sn]").forEach(inp=> inp.onchange = ()=>{
+    const x = data.tanks[+inp.dataset.i].stock.find(y=>y.id===inp.dataset.sn);
+    if(x){ x.name = inp.value; save(); }
+  });
+  app.querySelectorAll("[data-sc]").forEach(inp=> inp.onchange = ()=>{
+    const x = data.tanks[+inp.dataset.i].stock.find(y=>y.id===inp.dataset.sc);
+    if(x){ x.count = Math.max(0, Number(inp.value)||0); save(); }
+  });
+  app.querySelectorAll("[data-sd]").forEach(b=> b.onclick = ()=>{
+    if(!confirm("この生体の登録を削除します。よろしいですか？")) return;
+    const t = data.tanks[+b.dataset.i];
+    t.stock = t.stock.filter(x=>x.id!==b.dataset.sd);
+    save(); render();
+  });
+  app.querySelectorAll("[data-sa]").forEach(b=> b.onclick = ()=>{
+    const t = data.tanks[+b.dataset.sa];
+    t.stock.push({id:uid(), name:"生体"+(t.stock.length+1), count:0});
+    save(); render();
+  });
+
   app.querySelectorAll("[data-setimg]").forEach(b=> b.onclick = async ()=>{
     const url = await pickImage(1100,0.6);
     if(!url) return;
@@ -554,7 +711,7 @@ function renderTanks(){
   });
 
   app.querySelector("#addTank").onclick = ()=>{
-    data.tanks.push({id:uid(),name:"水槽"+(data.tanks.length+1),volume:"",interval:7,filters:[],hasPhoto:false});
+    data.tanks.push(newTank("水槽"+(data.tanks.length+1)));
     save(); render();
   };
   app.querySelector("#wipe").onclick = ()=>{
@@ -566,15 +723,7 @@ function renderTanks(){
 }
 
 function renderExport(){
-  const q = v => '"' + String(v??"").replace(/"/g,'""') + '"';
-  const tk = id => data.tanks.find(t=>t.id===id);
-  const nm = id => tk(id)?.name ?? id;
-  const fnames = r => (r.filterIds||[]).map(fid=> tk(r.tankId)?.filters.find(f=>f.id===fid)?.name).filter(Boolean).join("・");
-  const head = ["日付","水槽","水換え","換水率%","フィルター掃除","掃除したフィルター","レイアウト変更","メモ"].map(q).join(",");
-  const body = [...data.records].sort((a,b)=>a.date<b.date?-1:1)
-    .map(r=>[r.date,nm(r.tankId),r.changed?1:0,r.pct,r.cleaned?1:0,fnames(r),r.layout?1:0,r.memo].map(q).join(","));
-  const csv = [head,...body].join("\n");
-
+  const csv = buildCSV();
   app.innerHTML =
     '<div class="head"><button class="back" id="bk">‹</button><h2>CSVで書き出す</h2></div>'
     + '<div style="padding-top:20px">'
@@ -608,11 +757,10 @@ function renderImport(){
   app.innerHTML =
     '<div class="head"><button class="back" id="bk">‹</button><h2>CSVから復元</h2></div>'
     + '<div style="padding-top:20px">'
-    + '<p class="sub">書き出したCSVを読み込んで記録を戻します。写真は復元されません。</p>'
+    + '<p class="sub">書き出したCSVを読み込んで記録を戻します。写真と現在の生体数は復元されません。</p>'
     + '<div class="fld"><button class="btn" id="file">CSVファイルを選ぶ</button></div>'
     + '<div class="fld"><div class="lbl">または、CSVを貼り付け</div>'
-    +   '<textarea id="src" rows="8" placeholder="日付,水槽,水換え,..." '
-    +   'style="font-family:var(--mono);font-size:11.5px"></textarea></div>'
+    +   '<textarea id="src" rows="8" placeholder="日付,水槽,水換え,..." style="font-family:var(--mono);font-size:11.5px"></textarea></div>'
     + '<div class="fld"><div class="lbl">取り込みかた</div><div class="chips">'
     +   '<button class="chip on" id="mReplace">置き換え（復元用）</button>'
     +   '<button class="chip" id="mAppend">追加（重複は除く）</button></div>'
@@ -638,7 +786,6 @@ function renderImport(){
     };
     inp.click();
   };
-
   app.querySelector("#run").onclick = ()=>{
     const text = src.value.trim();
     const box = app.querySelector("#result");
