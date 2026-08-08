@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="水槽野帳">
+<meta name="apple-mobile-web-app-title" content="水槽管理野帳">
 <meta name="theme-color" content="#EDF0EC">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230E2233'/%3E%3Crect x='30' y='104' width='120' height='46' fill='%23D6E5EC'/%3E%3Crect x='30' y='30' width='120' height='120' fill='none' stroke='%23D6E5EC' stroke-width='7'/%3E%3C/svg%3E">
-<title>水槽野帳</title>
+<title>水槽管理野帳</title>
 <style>
   :root{
     --ink:#0E2233; --ink2:#4A6072; --paper:#EDF0EC; --card:#fff;
@@ -23,7 +23,7 @@
   button,input,textarea{font:inherit;color:inherit}
   .wrap{max-width:560px;margin:0 auto;padding:0 16px 96px}
   .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--ink2);text-transform:uppercase}
-  h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin:4px 0 6px}
+  h1{font-size:25px;font-weight:700;letter-spacing:.02em;margin:4px 0 6px}
   .sub{font-size:12.5px;color:var(--ink2);margin:0 0 20px}
   .head{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;
         background:var(--paper);border-bottom:1px solid var(--line);padding:12px 16px;margin:0 -16px 4px}
@@ -33,7 +33,15 @@
   .card{position:relative;display:block;width:100%;text-align:left;overflow:hidden;
         border:1px solid var(--line);background:var(--card);margin-bottom:10px;padding:0;cursor:pointer}
   .fill{position:absolute;left:0;right:0;bottom:0;background:var(--fill);transition:height .9s cubic-bezier(.22,.61,.36,1)}
-  .card .inner{position:relative;padding:14px;display:flex;gap:14px;align-items:stretch}
+  .card .inner{position:relative;padding:14px;display:flex;flex-direction:column}
+  .crow{display:flex;gap:14px;align-items:stretch}
+  .fmeta{display:flex;flex-direction:column;gap:4px;margin-top:11px;padding-top:10px;
+         border-top:1px dashed var(--line)}
+  .frow{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .fnm{font-size:11.5px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fdt{font-family:var(--mono);font-size:10.5px;color:var(--ink2);
+       font-variant-numeric:tabular-nums;flex:none}
+  .fdt.none{opacity:.55}
   .thumb{width:74px;height:74px;flex:none;border:1px solid var(--line);background:#fff;
          overflow:hidden;display:flex;align-items:center;justify-content:center}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -72,13 +80,15 @@
   .bar .in{max-width:560px;margin:0 auto}
 
   .rec{border:1px solid var(--line);background:#fff;padding:14px;margin-bottom:10px}
-  .rec .top{display:flex;justify-content:space-between;align-items:center}
+  .rec .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
   .rec .date{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+  .acts{display:flex;gap:4px}
   .tags{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:13px}
   .tags .w{color:var(--water)} .tags .f{color:var(--moss)} .tags .l{color:var(--clay)}
   .rec p{margin:8px 0 0;font-size:13px;color:var(--ink2);white-space:pre-wrap}
   .rec img{width:100%;margin-top:10px;display:block}
-  .del{background:none;border:0;color:var(--ink2);font-size:13px;cursor:pointer;padding:4px}
+  .act{background:none;border:1px solid var(--line);color:var(--ink2);font-size:12px;
+       cursor:pointer;padding:5px 10px;border-radius:2px}
   .note{border:1px solid var(--alert);color:var(--alert);padding:9px 12px;font-size:12.5px;margin-bottom:12px}
   .link{background:none;border:0;color:var(--ink2);font-size:12.5px;text-decoration:underline;cursor:pointer;padding:4px 0}
   .fline{display:flex;gap:8px;align-items:center;margin-bottom:8px}
@@ -92,26 +102,25 @@
 <div class="wrap" id="app">
   <div style="padding-top:40px">
     <div class="eyebrow">BOOTING</div>
-    <h1>水槽野帳</h1>
+    <h1>水槽管理野帳</h1>
     <p class="sub">読み込み中です。この表示のまま止まる場合は、下のエラー内容をお知らせください。</p>
   </div>
 </div>
 <div id="err" style="display:none;position:fixed;left:0;right:0;bottom:0;background:#A8412C;color:#fff;
-     padding:14px 16px;font-family:var(--mono);font-size:11.5px;line-height:1.5;white-space:pre-wrap;z-index:99"></div>
+     padding:14px 16px;font-family:ui-monospace,monospace;font-size:11.5px;line-height:1.5;white-space:pre-wrap;z-index:99"></div>
 
 <script>
 window.addEventListener("error", function(e){
-  var b = document.getElementById("err");
-  if(!b) return;
+  var b = document.getElementById("err"); if(!b) return;
   b.style.display = "block";
   b.textContent = "エラー: " + (e.message||"") + "\n" + (e.filename||"") + " 行 " + (e.lineno||"");
 });
 window.addEventListener("unhandledrejection", function(e){
-  var b = document.getElementById("err");
-  if(!b) return;
+  var b = document.getElementById("err"); if(!b) return;
   b.style.display = "block";
-  b.textContent = "エラー(非同期): " + String(e.reason && e.reason.message || e.reason);
+  b.textContent = "エラー(非同期): " + String((e.reason && e.reason.message) || e.reason);
 });
+
 /* ================= storage ================= */
 const LS = "aqNote.v1";
 const SEED = {
@@ -214,8 +223,82 @@ function pickImage(max,q){
 
 const recsOf = tid => data.records.filter(r=>r.tankId===tid).sort((a,b)=> a.date<b.date?1:-1);
 const lastChange = tid => recsOf(tid).find(r=>r.changed) || null;
+const lastClean = (tid, fid) =>
+  recsOf(tid).find(r => r.cleaned && (r.filterIds||[]).includes(fid)) || null;
 const workLabel = r => [r.changed?"水換え":null, r.cleaned?"フィルター掃除":null, r.layout?"レイアウト変更":null]
   .filter(Boolean).join("・") || "メモ";
+
+/* ================= CSV 取り込み ================= */
+function parseCSV(text){
+  const rows = []; let row = [], f = "", q = false;
+  text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n").replace(/^\uFEFF/,"");
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(q){
+      if(c === '"'){ if(text[i+1] === '"'){ f += '"'; i++; } else q = false; }
+      else f += c;
+    }else{
+      if(c === '"') q = true;
+      else if(c === ","){ row.push(f); f = ""; }
+      else if(c === "\n"){ row.push(f); f = ""; rows.push(row); row = []; }
+      else f += c;
+    }
+  }
+  if(f !== "" || row.length){ row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => String(x).trim() !== ""));
+}
+
+const recKey = r => [r.date, r.tankId, r.changed?1:0, r.cleaned?1:0, r.layout?1:0, (r.memo||"").trim()].join("|");
+
+function importCSV(text, mode){
+  const rows = parseCSV(text);
+  if(!rows.length) return {ok:false, msg:"データを読み取れませんでした。CSVの中身を確認してください。"};
+  const start = String(rows[0][0]).trim() === "日付" ? 1 : 0;
+  const truthy = v => ["1","true","TRUE","はい","○","YES","yes"].includes(String(v??"").trim());
+
+  const parsed = [];
+  let skipped = 0;
+  for(let i=start;i<rows.length;i++){
+    const c = rows[i];
+    const date = String(c[0]??"").trim();
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ skipped++; continue; }
+    const tname = String(c[1]??"").trim();
+    let t = data.tanks.find(x => x.name === tname);
+    if(!t){
+      t = {id:uid(), name:tname || "名称未設定", volume:"", interval:7, filters:[], hasPhoto:false};
+      data.tanks.push(t);
+    }
+    const fids = String(c[5]??"").split("・").map(x=>x.trim()).filter(Boolean).map(n=>{
+      let f = t.filters.find(x => x.name === n);
+      if(!f){ f = {id:uid(), name:n}; t.filters.push(f); }
+      return f.id;
+    });
+    parsed.push({
+      id: uid(), tankId: t.id, date,
+      changed: truthy(c[2]), pct: String(c[3]??"").trim(),
+      cleaned: truthy(c[4]), filterIds: fids,
+      layout: truthy(c[6]), memo: String(c[7]??""), hasPhoto: false
+    });
+  }
+  if(!parsed.length) return {ok:false, msg:"取り込める行がありませんでした（日付の形式は 2026-08-08 です）。"};
+
+  let added = 0, dup = 0;
+  if(mode === "replace"){
+    data.records.forEach(r => { if(r.hasPhoto) delPhoto(r.id); });
+    data.records = parsed; added = parsed.length;
+  }else{
+    const have = new Set(data.records.map(recKey));
+    parsed.forEach(r => {
+      if(have.has(recKey(r))){ dup++; return; }
+      have.add(recKey(r)); data.records.push(r); added++;
+    });
+  }
+  save();
+  return {ok:true, msg:"取り込みました：" + added + " 件"
+    + (dup ? " ／ 重複のため見送り " + dup + " 件" : "")
+    + (skipped ? " ／ 日付が読めず除外 " + skipped + " 件" : "")
+    + "。写真はCSVに含まれないため復元されません。"};
+}
 
 /* ================= views ================= */
 let view = {name:"list"};
@@ -230,24 +313,37 @@ function renderList(){
     const pct = d===null ? 0 : Math.min(1, d/(t.interval||7));
     const over = d!==null && d > (t.interval||7);
     const latest = recsOf(t.id)[0];
+    const fmeta = t.filters.length
+      ? '<span class="fmeta">' + t.filters.map(f=>{
+          const c = lastClean(t.id, f.id);
+          const fd = c ? daysSince(c.date) : null;
+          return '<span class="frow"><span class="fnm">'+esc(f.name)+'</span>'
+            + '<span class="fdt'+(c?"":" none")+'">'
+            + (c ? c.date.slice(5).replace("-",".")+"  "+fd+"日前" : "掃除記録なし")
+            + '</span></span>';
+        }).join("") + '</span>'
+      : "";
     return '<button class="card" data-tank="'+t.id+'">'
       + '<span class="fill" style="height:'+(pct*100)+'%;background:'+(over?"var(--over)":"var(--fill)")+'"></span>'
       + '<span class="inner">'
-      +   '<span class="thumb" data-tankphoto="'+t.id+'"><span>写真なし</span></span>'
-      +   '<span class="cbody">'
-      +     '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'
-      +       '<span class="cname">'+esc(t.name)+'</span>'
-      +       '<span class="cvol">'+(t.volume?esc(t.volume)+"L":"")+'</span></span>'
-      +     '<span style="display:flex;align-items:flex-end;gap:7px;margin-top:8px">'
-      +       '<span class="days '+(over?"over":"")+'">'+(d===null?"—":d)+'</span>'
-      +       '<span class="dlabel">'+(d===null?"換水記録なし":"日前に換水 ／ 目安 "+t.interval+"日")+'</span></span>'
-      +     '<span class="meta">'+(latest?"最終記録 "+latest.date.slice(5).replace("-",".")+" "+workLabel(latest):"")+'</span>'
-      +   '</span></span></button>';
+      +   '<span class="crow">'
+      +     '<span class="thumb" data-tankphoto="'+t.id+'"><span>写真なし</span></span>'
+      +     '<span class="cbody">'
+      +       '<span style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">'
+      +         '<span class="cname">'+esc(t.name)+'</span>'
+      +         '<span class="cvol">'+(t.volume?esc(t.volume)+"L":"")+'</span></span>'
+      +       '<span style="display:flex;align-items:flex-end;gap:7px;margin-top:8px">'
+      +         '<span class="days '+(over?"over":"")+'">'+(d===null?"—":d)+'</span>'
+      +         '<span class="dlabel">'+(d===null?"換水記録なし":"日前に換水 ／ 目安 "+t.interval+"日")+'</span></span>'
+      +       '<span class="meta">'+(latest?"最終記録 "+latest.date.slice(5).replace("-",".")+" "+workLabel(latest):"")+'</span>'
+      +     '</span>'
+      +   '</span>' + fmeta
+      + '</span></button>';
   }).join("");
 
   app.innerHTML =
-    '<div style="padding-top:28px"><div class="eyebrow">'+today().replace(/-/g,".")+'</div>'
-    + '<h1>水槽野帳</h1><p class="sub">カードの水位が満ちたら換水の目安です。</p></div>'
+    '<div style="padding-top:28px"><div class="eyebrow">本日 '+today().replace(/-/g,".")+'</div>'
+    + '<h1>水槽管理野帳</h1><p class="sub">カードの水位が満ちたら換水の目安です。</p></div>'
     + noteHTML() + cards
     + '<div style="display:flex;gap:8px;margin-top:24px">'
     + '<button class="btn small" id="toExport">CSVで書き出す</button>'
@@ -274,7 +370,8 @@ function renderTank(){
     + rows.map(r=>{
         const fl = (r.filterIds||[]).map(fname).filter(Boolean).join("・");
         return '<div class="rec"><div class="top"><span class="date">'+r.date.replace(/-/g,".")+'</span>'
-        + '<button class="del" data-del="'+r.id+'">削除</button></div>'
+        + '<span class="acts"><button class="act" data-edit="'+r.id+'">編集</button>'
+        + '<button class="act" data-del="'+r.id+'">削除</button></span></div>'
         + '<div class="tags">'
         +   (r.changed?'<span class="w">水換え'+(r.pct?" "+esc(r.pct)+"%":"")+'</span>':"")
         +   (r.cleaned?'<span class="f">フィルター掃除'+(fl?" ／ "+esc(fl):"")+'</span>':"")
@@ -288,7 +385,9 @@ function renderTank(){
 
   app.querySelector("#bk").onclick = ()=> go({name:"list"});
   app.querySelector("#add").onclick = ()=> go({name:"form", id:t.id});
+  app.querySelectorAll("[data-edit]").forEach(b=> b.onclick = ()=> go({name:"form", id:t.id, recId:b.dataset.edit}));
   app.querySelectorAll("[data-del]").forEach(b=> b.onclick = ()=>{
+    if(!confirm("この記録を削除します。よろしいですか？")) return;
     const id = b.dataset.del;
     if(data.records.find(r=>r.id===id)?.hasPhoto) delPhoto(id);
     data.records = data.records.filter(r=>r.id!==id);
@@ -302,67 +401,90 @@ function renderTank(){
 
 function renderForm(){
   const t = data.tanks.find(x=>x.id===view.id);
-  let photo = null;
-  const picked = new Set();
+  const rec = view.recId ? data.records.find(r=>r.id===view.recId) : null;
+  const picked = new Set(rec?.filterIds || []);
+  let photo = null;                                  // 新しく選んだ写真
+  let photoMode = rec?.hasPhoto ? "keep" : "none";   // keep / removed / new
 
+  const on = v => v ? " on" : "";
   app.innerHTML =
-    '<div class="head"><button class="back" id="bk">‹</button><h2>'+esc(t.name)+' に記録</h2></div>'
+    '<div class="head"><button class="back" id="bk">‹</button><h2>'
+      + (rec ? "記録を編集" : esc(t.name)+" に記録") + '</h2></div>'
     + noteHTML() + '<div style="padding-top:20px">'
-    + '<div class="fld"><div class="lbl">日付</div><input type="date" id="date" value="'+today()+'"></div>'
+    + '<div class="fld"><div class="lbl">日付</div><input type="date" id="date" value="'+(rec?rec.date:today())+'"></div>'
     + '<div class="fld"><div class="lbl">作業</div><div class="chips">'
-    +   '<button class="chip on" id="chg">水換え</button>'
-    +   '<button class="chip f" id="cln">フィルター掃除</button>'
-    +   '<button class="chip l" id="lay">レイアウト変更</button></div></div>'
+    +   '<button class="chip'+(rec?on(rec.changed):" on")+'" id="chg">水換え</button>'
+    +   '<button class="chip f'+(rec?on(rec.cleaned):"")+'" id="cln">フィルター掃除</button>'
+    +   '<button class="chip l'+(rec?on(rec.layout):"")+'" id="lay">レイアウト変更</button></div></div>'
     + '<div class="fld" id="pctWrap"><div class="lbl">換水率（％・任意）</div>'
-    +   '<input type="number" id="pct" inputmode="decimal" placeholder="30"></div>'
-    + '<div class="fld" id="fWrap" style="display:none"><div class="lbl">掃除したフィルター</div>'
+    +   '<input type="number" id="pct" inputmode="decimal" placeholder="30" value="'+esc(rec?.pct||"")+'"></div>'
+    + '<div class="fld" id="fWrap"><div class="lbl">掃除したフィルター</div>'
     +   (t.filters.length
-        ? '<div class="chips">'+t.filters.map(f=>'<button class="chip f" data-f="'+f.id+'">'+esc(f.name)+'</button>').join("")+'</div>'
+        ? '<div class="chips">'+t.filters.map(f=>
+            '<button class="chip f'+on(picked.has(f.id))+'" data-f="'+f.id+'">'+esc(f.name)+'</button>').join("")+'</div>'
         : '<p class="sub" style="margin:0">この水槽にはフィルターが登録されていません。「水槽の設定」から追加できます。</p>')
     + '</div>'
     + '<div class="fld"><div class="lbl">メモ</div>'
-    +   '<textarea id="memo" rows="3" placeholder="餌食い、コケ、生体の様子など"></textarea></div>'
+    +   '<textarea id="memo" rows="3" placeholder="餌食い、コケ、生体の様子など">'+esc(rec?.memo||"")+'</textarea></div>'
     + '<div class="fld"><div class="lbl">写真</div>'
-    +   '<button class="drop" id="pick">写真を追加</button><div id="prev"></div></div>'
+    +   '<button class="drop" id="pick">'+(rec?.hasPhoto?"写真を選び直す":"写真を追加")+'</button>'
+    +   '<div id="prev"></div></div>'
     + '<div style="display:flex;gap:8px">'
     +   '<button class="btn" id="cancel">やめる</button>'
-    +   '<button class="btn primary" id="ok">記録する</button></div></div>';
+    +   '<button class="btn primary" id="ok">'+(rec?"保存する":"記録する")+'</button></div></div>';
 
   const chg = app.querySelector("#chg"), cln = app.querySelector("#cln"), lay = app.querySelector("#lay");
   const pctWrap = app.querySelector("#pctWrap"), fWrap = app.querySelector("#fWrap");
-  chg.onclick = ()=>{ chg.classList.toggle("on"); pctWrap.style.display = chg.classList.contains("on")?"":"none"; };
-  cln.onclick = ()=>{ cln.classList.toggle("on"); fWrap.style.display = cln.classList.contains("on")?"":"none"; };
+  const sync = ()=>{
+    pctWrap.style.display = chg.classList.contains("on") ? "" : "none";
+    fWrap.style.display   = cln.classList.contains("on") ? "" : "none";
+  };
+  chg.onclick = ()=>{ chg.classList.toggle("on"); sync(); };
+  cln.onclick = ()=>{ cln.classList.toggle("on"); sync(); };
   lay.onclick = ()=> lay.classList.toggle("on");
+  sync();
+
   app.querySelectorAll("[data-f]").forEach(b=> b.onclick = ()=>{
     b.classList.toggle("on");
     b.classList.contains("on") ? picked.add(b.dataset.f) : picked.delete(b.dataset.f);
   });
 
   const prev = app.querySelector("#prev");
+  const showPhoto = url =>{
+    prev.innerHTML = '<img src="'+url+'" style="width:100%;margin-top:10px"><button class="link" id="rm">写真を削除</button>';
+    prev.querySelector("#rm").onclick = ()=>{ photo=null; photoMode="removed"; prev.innerHTML=""; };
+  };
+  if(rec?.hasPhoto) getPhoto(rec.id).then(u=>{ if(u && photoMode==="keep") showPhoto(u); });
+
   app.querySelector("#pick").onclick = async ()=>{
     const url = await pickImage(900,0.55);
     if(!url) return;
-    photo = url;
-    prev.innerHTML = '<img src="'+url+'" style="width:100%;margin-top:10px"><button class="link" id="rm">写真を削除</button>';
-    prev.querySelector("#rm").onclick = ()=>{ photo=null; prev.innerHTML=""; };
+    photo = url; photoMode = "new"; showPhoto(url);
   };
 
-  app.querySelector("#bk").onclick = app.querySelector("#cancel").onclick = ()=> go({name:"tank", id:t.id});
+  const back = ()=> go({name:"tank", id:t.id});
+  app.querySelector("#bk").onclick = app.querySelector("#cancel").onclick = back;
+
   app.querySelector("#ok").onclick = async ()=>{
-    const id = uid();
-    if(photo) await putPhoto(id, photo);
-    data.records.push({
-      id, tankId:t.id,
+    const fields = {
       date: app.querySelector("#date").value || today(),
       changed: chg.classList.contains("on"),
       cleaned: cln.classList.contains("on"),
-      layout: lay.classList.contains("on"),
+      layout:  lay.classList.contains("on"),
       filterIds: cln.classList.contains("on") ? [...picked] : [],
       pct: chg.classList.contains("on") ? app.querySelector("#pct").value : "",
-      memo: app.querySelector("#memo").value,
-      hasPhoto: !!photo
-    });
-    save(); go({name:"tank", id:t.id});
+      memo: app.querySelector("#memo").value
+    };
+    if(rec){
+      Object.assign(rec, fields);
+      if(photoMode === "new"){ await putPhoto(rec.id, photo); rec.hasPhoto = true; }
+      else if(photoMode === "removed"){ delPhoto(rec.id); rec.hasPhoto = false; }
+    }else{
+      const id = uid();
+      if(photoMode === "new") await putPhoto(id, photo);
+      data.records.push(Object.assign({id, tankId:t.id, hasPhoto: photoMode==="new"}, fields));
+    }
+    save(); back();
   };
 }
 
@@ -394,7 +516,6 @@ function renderTanks(){
     + '<div style="margin-top:20px"><button class="link" id="wipe">すべての記録を消す</button></div></div>';
 
   app.querySelector("#bk").onclick = ()=> go({name:"list"});
-
   app.querySelectorAll("[data-f]").forEach(inp=> inp.onchange = ()=>{
     const t = data.tanks[+inp.dataset.i], f = inp.dataset.f;
     t[f] = f==="interval" ? (Number(inp.value)||7) : inp.value;
@@ -461,9 +582,12 @@ function renderExport(){
     + '<div style="display:flex;gap:8px;margin-top:12px">'
     +   '<button class="btn small" id="copy">コピー</button>'
     +   '<button class="btn small" id="dl">ファイルとして保存</button></div>'
-    + '<div class="eyebrow" style="margin-top:12px">'+data.records.length+' 件</div></div>';
+    + '<div class="eyebrow" style="margin-top:12px">'+data.records.length+' 件</div>'
+    + '<div style="margin-top:28px;border-top:1px solid var(--line);padding-top:20px">'
+    +   '<button class="btn small" id="toImport">CSVから復元する</button></div></div>';
 
   app.querySelector("#bk").onclick = ()=> go({name:"list"});
+  app.querySelector("#toImport").onclick = ()=> go({name:"import"});
   const ta = app.querySelector("#csv");
   ta.onclick = ()=> ta.select();
   app.querySelector("#copy").onclick = async ()=>{
@@ -474,13 +598,61 @@ function renderExport(){
     const blob = new Blob(["\ufeff"+csv],{type:"text/csv"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "水槽野帳_"+today()+".csv";
+    a.download = "水槽管理野帳_"+today()+".csv";
     a.click(); URL.revokeObjectURL(a.href);
   };
 }
 
+function renderImport(){
+  app.innerHTML =
+    '<div class="head"><button class="back" id="bk">‹</button><h2>CSVから復元</h2></div>'
+    + '<div style="padding-top:20px">'
+    + '<p class="sub">書き出したCSVを読み込んで記録を戻します。写真は復元されません。</p>'
+    + '<div class="fld"><button class="btn" id="file">CSVファイルを選ぶ</button></div>'
+    + '<div class="fld"><div class="lbl">または、CSVを貼り付け</div>'
+    +   '<textarea id="src" rows="8" placeholder="日付,水槽,水換え,..." '
+    +   'style="font-family:var(--mono);font-size:11.5px"></textarea></div>'
+    + '<div class="fld"><div class="lbl">取り込みかた</div><div class="chips">'
+    +   '<button class="chip on" id="mReplace">置き換え（復元用）</button>'
+    +   '<button class="chip" id="mAppend">追加（重複は除く）</button></div>'
+    +   '<p class="sub" style="margin-top:10px">置き換えを選ぶと、いまアプリに入っている記録はすべて消えて、CSVの内容に入れ替わります。</p></div>'
+    + '<button class="btn primary" id="run">読み込む</button>'
+    + '<div id="result" style="margin-top:16px"></div></div>';
+
+  let mode = "replace";
+  const mR = app.querySelector("#mReplace"), mA = app.querySelector("#mAppend");
+  mR.onclick = ()=>{ mode="replace"; mR.classList.add("on"); mA.classList.remove("on"); };
+  mA.onclick = ()=>{ mode="append";  mA.classList.add("on"); mR.classList.remove("on"); };
+
+  const src = app.querySelector("#src");
+  app.querySelector("#bk").onclick = ()=> go({name:"export"});
+  app.querySelector("#file").onclick = ()=>{
+    const inp = document.createElement("input");
+    inp.type = "file"; inp.accept = ".csv,text/csv,text/plain";
+    inp.onchange = ()=>{
+      const f = inp.files[0]; if(!f) return;
+      const r = new FileReader();
+      r.onload = ()=>{ src.value = r.result; };
+      r.readAsText(f);
+    };
+    inp.click();
+  };
+
+  app.querySelector("#run").onclick = ()=>{
+    const text = src.value.trim();
+    const box = app.querySelector("#result");
+    if(!text){ box.innerHTML = '<div class="note">CSVが空です。</div>'; return; }
+    if(mode === "replace" && !confirm("いまの記録をすべて消して、CSVの内容に置き換えます。よろしいですか？")) return;
+    const res = importCSV(text, mode);
+    box.innerHTML = res.ok
+      ? '<div class="rec" style="margin:0"><p style="margin:0">'+esc(res.msg)+'</p></div>'
+      : '<div class="note">'+esc(res.msg)+'</div>';
+  };
+}
+
 function render(){
-  ({list:renderList, tank:renderTank, form:renderForm, tanks:renderTanks, export:renderExport})[view.name]();
+  ({list:renderList, tank:renderTank, form:renderForm, tanks:renderTanks,
+    export:renderExport, import:renderImport})[view.name]();
 }
 
 (async function init(){ load(); await openDB(); render(); })();
