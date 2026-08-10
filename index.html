@@ -648,6 +648,8 @@ function renderTanks(){
             + '<input type="number" class="num" value="'+(Number(x.count)||0)+'" data-sc="'+x.id+'" data-i="'+i+'">'
             + '<button class="fdel" data-sd="'+x.id+'" data-i="'+i+'">削除</button></div>').join("")
         + '<button class="link" data-sa="'+i+'">＋ 生体を追加</button>'
+        + '<div style="margin-top:18px;border-top:1px solid var(--line);padding-top:14px">'
+        +   '<button class="link" data-td="'+t.id+'" style="color:var(--alert)">この水槽を削除</button></div>'
         + '</div>').join("")
     + '<button class="drop" id="addTank">＋ 水槽を追加</button>'
     + '<div style="margin-top:20px"><button class="link" id="wipe">すべての記録を消す</button></div></div>';
@@ -708,6 +710,19 @@ function renderTanks(){
   app.querySelectorAll("[data-tp]").forEach(async el=>{
     const url = await getPhoto(tankKey(el.dataset.tp));
     if(url){ const im = new Image(); im.src = url; im.className = "tphoto"; el.appendChild(im); }
+  });
+
+  app.querySelectorAll("[data-td]").forEach(b=> b.onclick = ()=>{
+    const t = data.tanks.find(x=>x.id===b.dataset.td);
+    if(!t) return;
+    if(data.tanks.length <= 1){ alert("最後の1つは削除できません。"); return; }
+    const mine = data.records.filter(r=>r.tankId===t.id);
+    if(!confirm("「"+t.name+"」を削除します。\nこの水槽の記録 "+mine.length+" 件と写真も一緒に消えます。\n元に戻せません。よろしいですか？")) return;
+    mine.forEach(r=>{ if(r.hasPhoto) delPhoto(r.id); });
+    if(t.hasPhoto) delPhoto(tankKey(t.id));
+    data.records = data.records.filter(r=>r.tankId!==t.id);
+    data.tanks = data.tanks.filter(x=>x.id!==t.id);
+    save(); render();
   });
 
   app.querySelector("#addTank").onclick = ()=>{
